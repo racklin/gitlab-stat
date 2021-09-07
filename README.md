@@ -24,6 +24,15 @@ You can using `--config` option to specify config file.
 For example:
  `./gitlab-stat fetch --config=/home/rack/gitlabstat.php`.
 
+## Usage Demo
+<pre>
+Gen Gitlab Stat [2021-09-05]
+ 251/251 [▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓] 100% --  [ user_id = 9]
+Total = [44]
+Save to [result_2021-09-05.json]
+Save to [result_2021-09-05.sql]
+</pre>
+
 ------
 
 ## Framework
