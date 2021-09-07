@@ -38,8 +38,8 @@ class Gitlab
         $this->config = $config;
 
         // setting authentication and token
-        if(!empty(config('gitlab_url'))) $this->client->setUrl(config('gitlab_url'));
-        $this->client->authenticate(config('gitlab_token') ?? 'zMs573iVHRz7gnb5LnKk', Client::AUTH_HTTP_TOKEN);
+        if(!empty($config['gitlab_url'])) $this->client->setUrl($config['gitlab_url']);
+        $this->client->authenticate($config['gitlab_token'], Client::AUTH_HTTP_TOKEN);
     }
 
     public function __construct()

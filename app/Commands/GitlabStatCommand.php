@@ -11,14 +11,14 @@ use Illuminate\Console\Scheduling\Schedule;
 use LaravelZero\Framework\Commands\Command;
 use Symfony\Component\Console\Helper\ProgressBar;
 
-class GenStatCommand extends Command
+class GitlabStatCommand extends Command
 {
     /**
      * The signature of the command.
      *
      * @var string
      */
-    protected $signature = 'genstat {date?} {--config=}';
+    protected $signature = 'fetch {date?} {--config=}';
 
     /**
      * The description of the command.
@@ -34,22 +34,26 @@ class GenStatCommand extends Command
      */
     public function handle(Gitlab $gitlab)
     {
+        if ($this->hasOption('config') && file_exists($this->option('config'))) {
+            $config = @require_once($this->option('config'));
+        } else {
+            $config = config('gitlabstat');
+        }
 
         $date = $this->argument('date');
         if ($date) {
-            $today = Carbon::parse($date, config('gitlabstat.timezone'))->toImmutable();
-        }else {
-            $today = Carbon::today(config('gitlabstat.timezone'))->toImmutable();
+            $beforeDay = Carbon::parse($date, $config['timezone'] ?? 'UTC')->toImmutable()->addDay();
+        } else {
+            $beforeDay = Carbon::today($config['timezone'] ?? 'UTC')->toImmutable();
         }
-        $yesterday = $today->addDays(-1);
-        $prevDay =  $today->addDays(-2);
+        $processDay = $beforeDay->addDays(-1);
+        $afterDay = $beforeDay->addDays(-2);
 
-        $this->info('Gen Gitlab Stat [' . $yesterday->toDateString() . ']');
-
+        $this->info('Gen Gitlab Stat [' . $processDay->toDateString() . ']');
 
         // initial gitlab service
-        $gitlab->setConfig(config('gitlabstat'));
-       // $gRepositories = $client->repositories(); // repositories object
+        $gitlab->setConfig($config);
+        // $gRepositories = $client->repositories(); // repositories object
 
         // all commits array
         $allCommits = [];
@@ -59,15 +63,14 @@ class GenStatCommand extends Command
         $bar = $this->output->createProgressBar(count($allUsers));
         $bar->setFormat(' %current%/%max% [%bar%] %percent:3s%% -- %message%');
 
-
         foreach ($allUsers as $curUsers) {
 
             $bar->setMessage(' [ user_id = ' . $curUsers['id'] . ']');
             // $this->info('        processing [' . $curUsers['id'] . ']');
 
             $events = $gitlab->getUserEvents($curUsers['id'], [
-                'after' => $prevDay,
-                'before' => $today
+                'after' => $afterDay,
+                'before' => $beforeDay
             ]);
 
             foreach ($events as $event) {
@@ -78,7 +81,7 @@ class GenStatCommand extends Command
                 $commitDetail = $gitlab->getCommitDetail($event['project_id'], $event['push_data']['commit_to']);
 
                 // push to result array
-                array_push($allCommits, ['event'=>$event, 'commit'=>$commitDetail]);
+                array_push($allCommits, ['event' => $event, 'commit' => $commitDetail]);
             }
             $bar->advance();
 
@@ -88,14 +91,13 @@ class GenStatCommand extends Command
 
         $this->line('');
         $this->info('Total = [' . count($allCommits) . ']');
-        $this->info('Save to [result_' . $yesterday->toDateString() . '.json]');
-        $this->info('Save to [result_' . $yesterday->toDateString() . '.sql]');
+        $this->info('Save to [result_' . $processDay->toDateString() . '.json]');
 
         $commits = $gitlab->transformToData($allCommits);
         $commitsArray = $commits->toArray()['data'];
 
         // writing json
-        file_put_contents('result_' . $yesterday->toDateString() . '.json', json_encode($commitsArray));
+        file_put_contents('result_' . $processDay->toDateString() . '.json', json_encode($commitsArray));
 
     }
 

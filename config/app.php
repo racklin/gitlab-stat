@@ -39,7 +39,7 @@ return [
     |
     */
 
-    'production' => false,
+    'production' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -54,7 +54,6 @@ return [
 
     'providers' => [
         App\Providers\AppServiceProvider::class,
-        SimpleSoftwareIO\QrCode\QrCodeServiceProvider::class
     ],
 
 ];

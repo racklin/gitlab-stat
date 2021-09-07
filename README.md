@@ -13,11 +13,16 @@ return [
 ];
 ```
 
-## Usage
-Running `gitlab-stat` or `php gitlab-stat`.
+## From source code 
+Execute `gitlab-stat fetch` or `php gitlab-stat fetch`.
 
-Running with first parameter can be used to specify a processing date, default value is yesterday.
-Ex: `gitlab-stat 2021-09-01`
+With first parameter can be used to specify a processing date, default value is yesterday.
+Ex: `gitlab-stat fetch 2021-09-01`
+
+## From PHAR
+You can using `--config` option to specify config file.
+For example:
+ `./gitlab-stat fetch --config=/home/rack/gitlabstat.php`.
 
 ------
 
