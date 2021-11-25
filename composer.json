@@ -50,5 +50,5 @@
     },
     "minimum-stability": "dev",
     "prefer-stable": true,
-    "bin": ["welife-qrcode-cli"]
+    "bin": ["gitlab-stat"]
 }
